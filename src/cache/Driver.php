@@ -164,6 +164,45 @@ class Driver
     }
 
     /**
+     * 如果缓存存在，读取缓存，如果不存在，File抢占式创建缓存（在并发情况下,只会有一个进程创建缓存,其余进程阻塞等待）
+     * @param string $name
+     * @param \Closure $callback
+     * @param int $expireTime 缓存过期时间
+     * @return mixed
+     */
+    public function setnxDCS(string $name, \Closure $callback, int $expireTime = 0){
+        $data = $this->get($name);
+        if (empty($data)) {
+            $lockName = 'lock:' . $name;
+            // 当前进程进行设置缓存
+            if ($this->setnx($lockName, 'lock', 5)) {
+                $data = $callback(function ($number) use (&$expireTime) {
+                    $expireTime = $number;
+                });
+                if ($data !== false && $data !== null && $data !== "") {
+                    $this->set($name, $data, $expireTime);
+                    $this->delete($lockName);
+                }
+            } else {
+                // 其他进程等待缓存的加载
+                $count = 0; // 等待的次数
+                usleep(100000);
+                while (empty($this->get($name))) {
+                    // 如果循环了5次还没有等到结果（100毫秒 * 10），则判定去取数据的进程死亡（代码报错）
+                    if ($count > 10) {
+                        throw new \RedisException("请求终止");
+                        // 杀死所有进程（避免浪费服务器资源）
+                    }
+                    usleep(100000);
+                    $count++;
+                };
+                $data = $this->get($name);
+            }
+        }
+        return $data;
+    }
+
+    /**
      * 分布式锁 锁定
      * @param string $name 锁名称
      * @param int $occupy 占锁时间（秒）
