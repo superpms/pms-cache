@@ -1,6 +1,7 @@
 {
     "name": "superpms/pms-cache",
-    "type": "project",
+    "license": "Apache-2.0",
+    "description": "pms cache",
     "autoload": {
         "psr-4": {
             "pms\\": "src/"
