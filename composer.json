@@ -1,0 +1,21 @@
+{
+    "name": "superpms/pms-cache",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "pms\\": "src/"
+        },
+        "files": [
+            "stubs/load_stubs.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Guest",
+            "email": "2434981942@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    }
+}
