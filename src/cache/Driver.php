@@ -32,7 +32,7 @@ class Driver
         if (str_contains($rootPath, $this->noSymbol)) {
             $rootPath = str_replace($this->noSymbol, $this->symbol, $rootPath);
         }
-        $this->rootPath = trim($rootPath, $this->symbol);
+        $this->rootPath = rtrim($rootPath, $this->symbol);
         if (!is_dir($this->rootPath)) {
             mkdir($this->rootPath, 0777, true);
         }
